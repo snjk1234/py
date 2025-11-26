@@ -17,6 +17,20 @@ if 'data_processed' not in st.session_state:
     st.session_state.data_processed = None
 if 'sheets_client' not in st.session_state:
     st.session_state.sheets_client = sheets_manager.connect_sheets()
+if 'supervisors_df' not in st.session_state:
+    st.session_state.supervisors_df = None
+
+# Load supervisors data immediately when the app starts
+if st.session_state.sheets_client and st.session_state.supervisors_df is None:
+    with st.spinner("جاري تحميل بيانات المشرفين..."):
+        st.session_state.supervisors_df = sheets_manager.load_supervisors_data(st.session_state.sheets_client)
+elif not st.session_state.sheets_client and st.session_state.supervisors_df is None:
+    # Use local data if no connection
+    st.session_state.supervisors_df = pd.DataFrame({
+        "اسم المشرف": ["أحمد محمد", "سارة علي", "خالد عبدالله", "منى سعيد"],
+        "الفرع": ["الرياض - العليا", "جدة - التحلية", "الدمام - الشاطئ", "الخبر - الكورنيش"],
+        "نسبة المشاركة": [1.0, 0.5, 1.0, 0.5]
+    })
 
 # Apply Styles
 style.apply_custom_style(theme=st.session_state.theme)
