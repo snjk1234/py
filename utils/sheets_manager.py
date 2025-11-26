@@ -13,16 +13,48 @@ SCOPE = [
 def connect_sheets():
     """
     Connects to Google Sheets API.
+    Supports both Streamlit Secrets (Cloud) and local credentials.json (Development)
     """
     try:
-        # Check if secrets exist (Streamlit Cloud way) or local file
+        # 1. Try Streamlit Secrets (Preferred for Cloud)
+        if "gcp_service_account" in st.secrets:
+            try:
+                creds_dict = st.secrets["gcp_service_account"]
+                creds = ServiceAccountCredentials.from_json_keyfile_dict(dict(creds_dict), SCOPE)
+                client = gspread.authorize(creds)
+                return client
+            except Exception as e:
+                st.error(f"❌ خطأ في قراءة Secrets: {e}")
+                st.info("تأكد من صحة تنسيق البيانات في Streamlit Secrets (خاصة private_key)")
+                return None
+
+        # 2. Check if we are on Cloud but missing the specific section
+        # If we have some secrets but not the right section, warn the user
+        if st.secrets and "gcp_service_account" not in st.secrets:
+            st.warning("⚠️ تم العثور على Secrets ولكن القسم [gcp_service_account] مفقود.")
+            st.code("[gcp_service_account]\ntype = ...", language="toml")
+        
+        # 3. Fallback to local credentials.json
         creds_file = "credentials.json"
         creds = ServiceAccountCredentials.from_json_keyfile_name(creds_file, SCOPE)
         client = gspread.authorize(creds)
         return client
+
+    except FileNotFoundError:
+        # This runs if neither Secrets worked nor the file exists
+        st.error("🚫 لم يتم العثور على بيانات الاعتماد!")
+        st.markdown("""
+        **كيفية الحل:**
+        1. **إذا كنت على Streamlit Cloud:**
+           - اذهب إلى Settings > Secrets
+           - تأكد من إضافة البيانات تحت العنوان `[gcp_service_account]`
+        
+        2. **إذا كنت محلياً:**
+           - تأكد من وجود ملف `credentials.json` في مجلد المشروع
+        """)
+        return None
     except Exception as e:
         st.error(f"فشل الاتصال بـ Google Sheets: {e}")
-        st.info("تأكد من وجود ملف credentials.json في المجلد الرئيسي.")
         return None
 
 def get_or_create_sheet(client, spreadsheet_name="Commission_System_DB"):
