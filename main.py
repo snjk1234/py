@@ -2,7 +2,11 @@ import streamlit as st
 import pandas as pd
 import io
 from utils import style, data_loader, calculations, sheets_manager
+<<<<<<< HEAD
 ##بسم الله
+=======
+
+>>>>>>> 9ec2133cb0d0cec79568977dc9e5e334d59d04c4
 # Page Configuration
 st.set_page_config(
     page_title="نظام عمولة المشرفين",

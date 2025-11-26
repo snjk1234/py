@@ -13,6 +13,7 @@ SCOPE = [
 def connect_sheets():
     """
     Connects to Google Sheets API.
+<<<<<<< HEAD
     Supports both Streamlit Secrets (Cloud) and local credentials.json (Development)
     """
     try:
@@ -35,10 +36,16 @@ def connect_sheets():
             st.code("[gcp_service_account]\ntype = ...", language="toml")
         
         # 3. Fallback to local credentials.json
+=======
+    """
+    try:
+        # Check if secrets exist (Streamlit Cloud way) or local file
+>>>>>>> 9ec2133cb0d0cec79568977dc9e5e334d59d04c4
         creds_file = "credentials.json"
         creds = ServiceAccountCredentials.from_json_keyfile_name(creds_file, SCOPE)
         client = gspread.authorize(creds)
         return client
+<<<<<<< HEAD
 
     except FileNotFoundError:
         # This runs if neither Secrets worked nor the file exists
@@ -55,6 +62,11 @@ def connect_sheets():
         return None
     except Exception as e:
         st.error(f"فشل الاتصال بـ Google Sheets: {e}")
+=======
+    except Exception as e:
+        st.error(f"فشل الاتصال بـ Google Sheets: {e}")
+        st.info("تأكد من وجود ملف credentials.json في المجلد الرئيسي.")
+>>>>>>> 9ec2133cb0d0cec79568977dc9e5e334d59d04c4
         return None
 
 def get_or_create_sheet(client, spreadsheet_name="Commission_System_DB"):
